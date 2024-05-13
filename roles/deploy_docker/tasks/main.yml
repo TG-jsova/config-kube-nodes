@@ -1,0 +1,77 @@
+---
+- name: Install aptitude
+  apt:
+    name: aptitude
+    state: latest
+    update_cache: true
+
+- name: Install required system packages
+  apt:
+    pkg:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+      - firewalld
+    state: latest
+    update_cache: true
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: "present"
+
+- name: Update apt and install docker-ce
+  apt:
+    name: docker-ce
+    state: latest
+    update_cache: true
+
+- name: Update apt and install docker-compose
+  apt:
+    name: docker-compose
+    state: latest
+    update_cache: true
+
+- name: Enable IP Forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: enable and start docker
+  systemd:
+    name: docker
+    daemon-reload: yes
+    enabled: yes
+    state: started
+
+- name: setup a cronjob for docker cleanup
+  changed_when: false
+  cron:
+    name: docker cleanup
+    minute: "00"
+    hour: "21"
+    user: root
+    job: 'docker system prune -f --filter "until=2h" -a >/dev/null 2>&1'
+    cron_file: docker_cleanup
+
+- name: setup a cronjob for docker volumes cleanup
+  changed_when: false
+  cron:
+    name: docker volumes cleanup
+    minute: "15"
+    hour: "21"
+    user: root
+    job: 'for vol in $(docker volume ls -q -f dangling=true); do docker volume rm $vol >/dev/null 2>&1; done'
+    cron_file: docker_cleanup

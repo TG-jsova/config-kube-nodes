@@ -1,0 +1,9 @@
+---
+# Install and configure NVIDIA DLS hosts
+- hosts: kube
+  gather_facts: yes
+  become: true
+  roles:
+    - ubuntu_updates
+    - install_packages
+    - deploy_docker
