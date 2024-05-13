@@ -6,4 +6,5 @@
   roles:
     - ubuntu_updates
     - install_packages
+    - mount_nfs
     - deploy_docker

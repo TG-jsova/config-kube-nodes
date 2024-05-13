@@ -1,0 +1,17 @@
+---
+- name: Recursively change ownership of a directory
+  ansible.builtin.file:
+    path: /mnt/docker
+    state: directory
+    recurse: yes
+    owner: jsova
+    group: jsova
+
+- name: Mount NFS volumes with noauto according to boot option
+  ansible.posix.mount:
+    src: 192.168.0.10:/mnt/Storage/docker
+    path: /mnt/docker
+    opts: auto,nofail,noatime,nolock,intr,tcp,actimeo=1800
+    boot: true
+    state: mounted
+    fstype: nfs

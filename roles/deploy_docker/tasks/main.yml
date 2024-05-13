@@ -75,3 +75,7 @@
     user: root
     job: 'for vol in $(docker volume ls -q -f dangling=true); do docker volume rm $vol >/dev/null 2>&1; done'
     cron_file: docker_cleanup
+
+- name: Disable swap for current session
+  command: swapoff -a
+  become: true
